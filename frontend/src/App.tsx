@@ -48,7 +48,7 @@ import {
   Calculate,
   ChatBubbleOutline,
   Send,
-  SmartToy
+  SmartToy,
 } from '@mui/icons-material';
 
 // Add CSS animation for spinning icon
@@ -121,15 +121,15 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      text: "Hello! 👋 I'm your AI Banking Assistant. I'm here to help you find the perfect banking product for your needs. What are you looking for today?",
+      text: "Hello! 👋 I'm your Banking Assistant. I'm here to help you find the banking product for your needs. What are you looking for today?",
       sender: 'bot',
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    },
   ]);
   const [currentMessage, setCurrentMessage] = useState('');
 
   const steps = [
-    'AI Assistant',
+    'AIB Assistant',
     'Product Selection',
     'Customer Details',
     'Application Details',
@@ -243,68 +243,101 @@ function App() {
       id: Date.now().toString(),
       text: `Great choice! You've selected ${product.name}. Let's start your application process.`,
       sender: 'bot',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    setChatMessages(prev => [...prev, selectionMessage]);
-    
+    setChatMessages((prev) => [...prev, selectionMessage]);
+
     // Navigate to customer details step after a short delay
     setTimeout(() => {
       setCurrentStep(1); // Go to customer details step
     }, 1500);
   };
 
-  const generateBotResponse = (userMessage: string): { text: string; suggestedProducts?: Product[] } => {
+  const generateBotResponse = (
+    userMessage: string
+  ): { text: string; suggestedProducts?: Product[] } => {
     const message = userMessage.toLowerCase();
-    
+
     // Loan-related keywords
-    if (message.includes('loan') || message.includes('borrow') || message.includes('money') || message.includes('finance')) {
-      if (message.includes('personal') || message.includes('quick') || message.includes('small')) {
+    if (
+      message.includes('loan') ||
+      message.includes('borrow') ||
+      message.includes('money') ||
+      message.includes('finance')
+    ) {
+      if (
+        message.includes('personal') ||
+        message.includes('quick') ||
+        message.includes('small')
+      ) {
         return {
           text: "I can help you with a Personal Loan! It's perfect for quick financing up to €10,000 with instant approval. Would you like to explore this option?",
-          suggestedProducts: [products.find(p => p.id === 'personal_loan')!]
+          suggestedProducts: [products.find((p) => p.id === 'personal_loan')!],
         };
-      } else if (message.includes('long term') || message.includes('large') || message.includes('major')) {
+      } else if (
+        message.includes('long term') ||
+        message.includes('large') ||
+        message.includes('major')
+      ) {
         return {
-          text: "A Term Loan sounds like what you need! It offers competitive rates for larger amounts up to €100,000 with extended repayment terms. Shall we look at this?",
-          suggestedProducts: [products.find(p => p.id === 'term_loan')!]
+          text: 'A Term Loan sounds like what you need! It offers competitive rates for larger amounts up to €100,000 with extended repayment terms. Shall we look at this?',
+          suggestedProducts: [products.find((p) => p.id === 'term_loan')!],
         };
-      } else if (message.includes('green') || message.includes('eco') || message.includes('sustainable') || message.includes('environment')) {
+      } else if (
+        message.includes('green') ||
+        message.includes('eco') ||
+        message.includes('sustainable') ||
+        message.includes('environment')
+      ) {
         return {
-          text: "Excellent choice for the environment! Our Green Loan offers lower interest rates for sustainable projects. Let me show you the details:",
-          suggestedProducts: [products.find(p => p.id === 'green_loan')!]
+          text: 'Excellent choice for the environment! Our Green Loan offers lower interest rates for sustainable projects. Let me show you the details:',
+          suggestedProducts: [products.find((p) => p.id === 'green_loan')!],
         };
       } else {
         return {
-          text: "I can help you with different types of loans! Here are our loan options:",
-          suggestedProducts: products.filter(p => p.id.includes('loan'))
+          text: 'I can help you with different types of loans! Here are our loan options:',
+          suggestedProducts: products.filter((p) => p.id.includes('loan')),
         };
       }
     }
-    
+
     // Credit card keywords
-    else if (message.includes('credit card') || message.includes('card') || message.includes('credit')) {
+    else if (
+      message.includes('credit card') ||
+      message.includes('card') ||
+      message.includes('credit')
+    ) {
       return {
-        text: "Our Credit Cards come with great rewards and benefits! Contactless payments, cashback rewards, and travel insurance. Would you like to apply?",
-        suggestedProducts: [products.find(p => p.id === 'credit_card')!]
+        text: 'Our Credit Cards come with great rewards and benefits! Contactless payments, cashback rewards, and travel insurance. Would you like to apply?',
+        suggestedProducts: [products.find((p) => p.id === 'credit_card')!],
       };
     }
-    
+
     // Overdraft keywords
-    else if (message.includes('overdraft') || message.includes('account') || message.includes('flexible')) {
+    else if (
+      message.includes('overdraft') ||
+      message.includes('account') ||
+      message.includes('flexible')
+    ) {
       return {
-        text: "An Overdraft facility gives you instant access to funds when you need them. You only pay interest when you use it. Interested?",
-        suggestedProducts: [products.find(p => p.id === 'overdraft')!]
+        text: 'An Overdraft facility gives you instant access to funds when you need them. You only pay interest when you use it. Interested?',
+        suggestedProducts: [products.find((p) => p.id === 'overdraft')!],
       };
     }
-    
+
     // General inquiry
-    else if (message.includes('help') || message.includes('options') || message.includes('products') || message.includes('what')) {
+    else if (
+      message.includes('help') ||
+      message.includes('options') ||
+      message.includes('products') ||
+      message.includes('what')
+    ) {
       return {
         text: "I can help you with all our banking products! Here's what we offer:",
-        suggestedProducts: products
+        suggestedProducts: products,
       };
     }
-    
+
     // Default response
     else {
       return {
@@ -320,7 +353,7 @@ function App() {
       id: Date.now().toString(),
       text: currentMessage,
       sender: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     const botResponse = generateBotResponse(currentMessage);
@@ -329,10 +362,10 @@ function App() {
       text: botResponse.text,
       sender: 'bot',
       timestamp: new Date(),
-      suggestedProducts: botResponse.suggestedProducts
+      suggestedProducts: botResponse.suggestedProducts,
     };
 
-    setChatMessages(prev => [...prev, userMessage, botMessage]);
+    setChatMessages((prev) => [...prev, userMessage, botMessage]);
     setCurrentMessage('');
   };
 
@@ -390,7 +423,7 @@ function App() {
 
       {/* Step -1: AI Assistant Chat */}
       {currentStep === -1 && (
-        <AIChatInterface 
+        <AIChatInterface
           messages={chatMessages}
           currentMessage={currentMessage}
           onMessageChange={setCurrentMessage}
@@ -409,11 +442,11 @@ function App() {
               startIcon={<ArrowBack />}
               onClick={handleBack}
             >
-              Back to AI Assistant
+              Back to AIB Assistant
             </Button>
           </Box>
           <Typography variant="h4" gutterBottom textAlign="center">
-            Welcome to AI Banking Assistant
+            Welcome to AIB Banking Assistant
           </Typography>
           <Typography
             variant="h6"
@@ -1345,7 +1378,9 @@ function ReviewDecisionStep({
     // Simulate AI decision making
     setTimeout(() => {
       // Simple decision logic for demo - always approve existing customers
-      const isApproved = customer.isExistingCustomer ? true : Math.random() > 0.3;
+      const isApproved = customer.isExistingCustomer
+        ? true
+        : Math.random() > 0.3;
 
       setDecision(isApproved ? 'approved' : 'denied');
       setProcessing(false);
@@ -1681,46 +1716,51 @@ function CompletionStep({
 }
 
 // AI Chat Interface Component
-function AIChatInterface({ 
-  messages, 
-  currentMessage, 
-  onMessageChange, 
-  onSendMessage, 
-  onProductSelect, 
-  onProceedToProducts 
-}: { 
-  messages: ChatMessage[], 
-  currentMessage: string, 
-  onMessageChange: (message: string) => void, 
-  onSendMessage: () => void, 
-  onProductSelect: (product: Product) => void, 
-  onProceedToProducts: () => void 
+function AIChatInterface({
+  messages,
+  currentMessage,
+  onMessageChange,
+  onSendMessage,
+  onProductSelect,
+  onProceedToProducts,
+}: {
+  messages: ChatMessage[];
+  currentMessage: string;
+  onMessageChange: (message: string) => void;
+  onSendMessage: () => void;
+  onProductSelect: (product: Product) => void;
+  onProceedToProducts: () => void;
 }) {
   return (
-    <Paper sx={{ p: 4, maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
+    <Paper
+      sx={{ p: 4, maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}
+    >
       <Box display="flex" alignItems="center" gap={2} mb={3}>
         <SmartToy color="primary" sx={{ fontSize: 32 }} />
-        <Typography variant="h5">AI Banking Assistant</Typography>
+        <Typography variant="h5">AIB Banking Assistant</Typography>
         <Chip label="Live Chat" color="success" size="small" />
       </Box>
 
       {/* Chat Messages */}
-      <Box sx={{ 
-        flexGrow: 1, 
-        overflowY: 'auto', 
-        mb: 3, 
-        border: '1px solid #e0e0e0', 
-        borderRadius: 2, 
-        p: 2,
-        maxHeight: '400px'
-      }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflowY: 'auto',
+          mb: 3,
+          border: '1px solid #e0e0e0',
+          borderRadius: 2,
+          p: 2,
+          maxHeight: '400px',
+        }}
+      >
         {messages.map((message) => (
           <Box key={message.id} sx={{ mb: 2 }}>
             <Box
               sx={{
                 display: 'flex',
-                justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
-                mb: 1
+                justifyContent:
+                  message.sender === 'user' ? 'flex-end' : 'flex-start',
+                mb: 1,
               }}
             >
               <Paper
@@ -1729,7 +1769,10 @@ function AIChatInterface({
                   maxWidth: '70%',
                   bgcolor: message.sender === 'user' ? '#1976d2' : '#f5f5f5',
                   color: message.sender === 'user' ? 'white' : 'black',
-                  borderRadius: message.sender === 'user' ? '20px 20px 5px 20px' : '20px 20px 20px 5px'
+                  borderRadius:
+                    message.sender === 'user'
+                      ? '20px 20px 5px 20px'
+                      : '20px 20px 20px 5px',
                 }}
               >
                 <Typography variant="body1">{message.text}</Typography>
@@ -1737,55 +1780,78 @@ function AIChatInterface({
             </Box>
 
             {/* Product Suggestions */}
-            {message.suggestedProducts && message.suggestedProducts.length > 0 && (
-              <Box sx={{ ml: message.sender === 'bot' ? 0 : 'auto', maxWidth: '80%' }}>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Recommended products:
-                </Typography>
-                <Grid container spacing={1}>
-                  {message.suggestedProducts.map((product) => (
-                    <Grid item xs={12} sm={6} key={product.id}>
-                      <Card 
-                        sx={{ 
-                          cursor: 'pointer',
-                          border: '1px solid #e0e0e0',
-                          '&:hover': { 
-                            borderColor: product.color,
-                            transform: 'translateY(-2px)',
-                            transition: 'all 0.2s'
-                          }
-                        }}
-                        onClick={() => onProductSelect(product)}
-                      >
-                        <CardContent sx={{ p: 2 }}>
-                          <Box display="flex" alignItems="center" gap={1} mb={1}>
-                            <Box sx={{ color: product.color, fontSize: 24 }}>
-                              {product.icon}
+            {message.suggestedProducts &&
+              message.suggestedProducts.length > 0 && (
+                <Box
+                  sx={{
+                    ml: message.sender === 'bot' ? 0 : 'auto',
+                    maxWidth: '80%',
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
+                    Recommended products:
+                  </Typography>
+                  <Grid container spacing={1}>
+                    {message.suggestedProducts.map((product) => (
+                      <Grid item xs={12} sm={6} key={product.id}>
+                        <Card
+                          sx={{
+                            cursor: 'pointer',
+                            border: '1px solid #e0e0e0',
+                            '&:hover': {
+                              borderColor: product.color,
+                              transform: 'translateY(-2px)',
+                              transition: 'all 0.2s',
+                            },
+                          }}
+                          onClick={() => onProductSelect(product)}
+                        >
+                          <CardContent sx={{ p: 2 }}>
+                            <Box
+                              display="flex"
+                              alignItems="center"
+                              gap={1}
+                              mb={1}
+                            >
+                              <Box sx={{ color: product.color, fontSize: 24 }}>
+                                {product.icon}
+                              </Box>
+                              <Typography variant="subtitle2" fontWeight="bold">
+                                {product.name}
+                              </Typography>
                             </Box>
-                            <Typography variant="subtitle2" fontWeight="bold">
-                              {product.name}
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              fontSize="0.8rem"
+                            >
+                              {product.limits}
                             </Typography>
-                          </Box>
-                          <Typography variant="body2" color="text.secondary" fontSize="0.8rem">
-                            {product.limits}
-                          </Typography>
-                          {product.interestRate && (
-                            <Typography variant="body2" color="primary" fontSize="0.8rem">
-                              {product.interestRate}
-                            </Typography>
-                          )}
-                        </CardContent>
-                        <CardActions sx={{ p: 1 }}>
-                          <Button size="small" sx={{ fontSize: '0.7rem' }}>
-                            Select This Product
-                          </Button>
-                        </CardActions>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
-            )}
+                            {product.interestRate && (
+                              <Typography
+                                variant="body2"
+                                color="primary"
+                                fontSize="0.8rem"
+                              >
+                                {product.interestRate}
+                              </Typography>
+                            )}
+                          </CardContent>
+                          <CardActions sx={{ p: 1 }}>
+                            <Button size="small" sx={{ fontSize: '0.7rem' }}>
+                              Select This Product
+                            </Button>
+                          </CardActions>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              )}
           </Box>
         ))}
       </Box>
@@ -1825,7 +1891,7 @@ function AIChatInterface({
         </Button>
         <Button
           variant="text"
-          onClick={() => onMessageChange("I need help choosing a product")}
+          onClick={() => onMessageChange('I need help choosing a product')}
         >
           Need Help Choosing?
         </Button>
