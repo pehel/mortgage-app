@@ -167,7 +167,7 @@ function App() {
       icon: <TrendingUp />,
       color: '#388e3c',
       features: ['Competitive rates', 'Extended terms', 'Large amounts'],
-      limits: '€5,000 - €100,000',
+      limits: '€5,000 - €300,000',
       interestRate: '2.9% - 6.5%',
     },
     {
@@ -218,9 +218,9 @@ function App() {
     ],
     green_loan: [
       'Passport/ID',
-      'Bank Statement (3 months)',
+      'Bank Statement (6 months)',
       'Income Proof',
-      'Project Documentation',
+      'Address Proof',
     ],
     credit_card: [
       'Passport/ID',
@@ -228,7 +228,7 @@ function App() {
       'Income Proof',
       'Employment Letter',
     ],
-    overdraft: ['Passport/ID', 'Bank Statement (6 months)', 'Account Details'],
+    overdraft: ['Passport/ID', 'Bank Statement (6 months)', 'Address Proof'],
   };
 
   const handleProductSelect = (product: Product) => {
@@ -389,7 +389,9 @@ function App() {
       setCurrentStep(5);
     } else {
       // Handle rejection
-      alert('Application denied. Please contact our support team.');
+      alert(
+        'Application denied. Please contact our support team at support@aib.ie.'
+      );
     }
   };
 
@@ -403,7 +405,7 @@ function App() {
         <Toolbar>
           <AccountBalance sx={{ mr: 2 }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            AIBanking
+            AIB Banking
           </Typography>
           <Chip
             label={`Step ${currentStep + 1} of ${steps.length}`}
