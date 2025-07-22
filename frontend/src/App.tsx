@@ -134,7 +134,7 @@ function App() {
   const [currentMessage, setCurrentMessage] = useState('');
 
   const steps = [
-    'AIB Assistant',
+    'Personal Assistant',
     'Product Selection',
     'Customer Details',
     'Application Details',
@@ -410,7 +410,7 @@ function App() {
         <Toolbar>
           <AccountBalance sx={{ mr: 2 }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            AIB Banking
+            Personal Banking
           </Typography>
           <Chip
             label={`Step ${currentStep + 1} of ${steps.length}`}
@@ -449,11 +449,11 @@ function App() {
               startIcon={<ArrowBack />}
               onClick={handleBack}
             >
-              Back to AIB Assistant
+              Back to Personal Assistant
             </Button>
           </Box>
           <Typography variant="h4" gutterBottom textAlign="center">
-            Welcome to AIB Banking Assistant
+            Welcome to Personal Banking Assistant
           </Typography>
           <Typography
             variant="h6"
@@ -648,7 +648,9 @@ function CustomerDetailsForm({
   product: Product;
   onSubmit: (data: CustomerData) => void;
 }) {
-  const [applicationType, setApplicationType] = useState<'single' | 'joint' | ''>('');
+  const [applicationType, setApplicationType] = useState<
+    'single' | 'joint' | ''
+  >('');
   const [primaryApplicant, setPrimaryApplicant] = useState<CustomerData>({
     firstName: '',
     lastName: '',
@@ -674,8 +676,12 @@ function CustomerDetailsForm({
     isExistingCustomer: false,
   });
 
-  const [primaryUploadMethod, setPrimaryUploadMethod] = useState<'manual' | 'bankStatement'>('manual');
-  const [jointUploadMethod, setJointUploadMethod] = useState<'manual' | 'bankStatement'>('manual');
+  const [primaryUploadMethod, setPrimaryUploadMethod] = useState<
+    'manual' | 'bankStatement'
+  >('manual');
+  const [jointUploadMethod, setJointUploadMethod] = useState<
+    'manual' | 'bankStatement'
+  >('manual');
   const [isExtractingPrimary, setIsExtractingPrimary] = useState(false);
   const [isExtractingJoint, setIsExtractingJoint] = useState(false);
 
@@ -690,7 +696,7 @@ function CustomerDetailsForm({
       } else {
         setIsExtractingJoint(true);
       }
-      
+
       // Simulate bank statement processing
       setTimeout(() => {
         const extractedData = {
@@ -699,8 +705,11 @@ function CustomerDetailsForm({
           email: '', // Manual input only
           phone: '', // Manual input only
           dateOfBirth: '', // Manual input only
-          address: applicantType === 'primary' ? '123 Grafton Street, Dublin 2, Ireland' : '456 O\'Connell Street, Dublin 1, Ireland',
-          currentBalance: applicantType === 'primary' ? 15420.50 : 8750.25,
+          address:
+            applicantType === 'primary'
+              ? '123 Grafton Street, Dublin 2, Ireland'
+              : "456 O'Connell Street, Dublin 1, Ireland",
+          currentBalance: applicantType === 'primary' ? 15420.5 : 8750.25,
           annualIncome: applicantType === 'primary' ? 65000 : 48000,
           monthlySalary: applicantType === 'primary' ? 5416.67 : 4000,
           isExistingCustomer: false,
@@ -723,44 +732,46 @@ function CustomerDetailsForm({
     applicantType: 'primary' | 'joint'
   ) => {
     if (applicantType === 'primary') {
-      setPrimaryApplicant(prev => ({ ...prev, [field]: value }));
+      setPrimaryApplicant((prev) => ({ ...prev, [field]: value }));
     } else {
-      setJointApplicant(prev => ({ ...prev, [field]: value }));
+      setJointApplicant((prev) => ({ ...prev, [field]: value }));
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const submissionData: CustomerData = {
       ...primaryApplicant,
       isJoint: applicationType === 'joint',
       jointApplicant: applicationType === 'joint' ? jointApplicant : undefined,
     };
-    
+
     onSubmit(submissionData);
   };
 
   const isFormValid = () => {
-    const isPrimaryValid = primaryApplicant.firstName && 
-                           primaryApplicant.lastName && 
-                           primaryApplicant.email && 
-                           primaryApplicant.phone &&
-                           primaryApplicant.dateOfBirth &&
-                           primaryApplicant.address;
+    const isPrimaryValid =
+      primaryApplicant.firstName &&
+      primaryApplicant.lastName &&
+      primaryApplicant.email &&
+      primaryApplicant.phone &&
+      primaryApplicant.dateOfBirth &&
+      primaryApplicant.address;
 
     if (applicationType === 'single') {
       return isPrimaryValid;
     } else if (applicationType === 'joint') {
-      const isJointValid = jointApplicant.firstName && 
-                           jointApplicant.lastName && 
-                           jointApplicant.email && 
-                           jointApplicant.phone &&
-                           jointApplicant.dateOfBirth &&
-                           jointApplicant.address;
+      const isJointValid =
+        jointApplicant.firstName &&
+        jointApplicant.lastName &&
+        jointApplicant.email &&
+        jointApplicant.phone &&
+        jointApplicant.dateOfBirth &&
+        jointApplicant.address;
       return isPrimaryValid && isJointValid;
     }
-    
+
     return false;
   };
 
@@ -772,21 +783,30 @@ function CustomerDetailsForm({
     isExtracting: boolean
   ) => (
     <Box sx={{ mb: 4 }}>
-      <Typography variant="h6" gutterBottom sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-        {applicantType === 'primary' ? 'Primary Applicant' : 'Joint Applicant'} Details
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ color: '#1976d2', fontWeight: 'bold' }}
+      >
+        {applicantType === 'primary' ? 'Primary Applicant' : 'Joint Applicant'}{' '}
+        Details
       </Typography>
 
       {/* Data Input Method Selection */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="subtitle1" gutterBottom>
-          How would you like to provide information for the {applicantType} applicant?
+          How would you like to provide information for the {applicantType}{' '}
+          applicant?
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <Card
               sx={{
                 cursor: 'pointer',
-                border: uploadMethod === 'manual' ? '2px solid #1976d2' : '1px solid #e0e0e0',
+                border:
+                  uploadMethod === 'manual'
+                    ? '2px solid #1976d2'
+                    : '1px solid #e0e0e0',
                 '&:hover': { borderColor: '#1976d2' },
               }}
               onClick={() => setUploadMethod('manual')}
@@ -806,7 +826,10 @@ function CustomerDetailsForm({
             <Card
               sx={{
                 cursor: 'pointer',
-                border: uploadMethod === 'bankStatement' ? '2px solid #1976d2' : '1px solid #e0e0e0',
+                border:
+                  uploadMethod === 'bankStatement'
+                    ? '2px solid #1976d2'
+                    : '1px solid #e0e0e0',
                 '&:hover': { borderColor: '#1976d2' },
               }}
               onClick={() => setUploadMethod('bankStatement')}
@@ -829,7 +852,10 @@ function CustomerDetailsForm({
       {uploadMethod === 'bankStatement' && (
         <Box sx={{ mb: 3 }}>
           <Alert severity="success" sx={{ mb: 2 }}>
-            <strong>Smart Data Extraction:</strong> Upload bank statement and we'll extract Name, Address, Current Balance, Income, and Salary information automatically. Email, Phone, and Date of Birth must be entered manually.
+            <strong>Smart Data Extraction:</strong> Upload bank statement and
+            we'll extract Name, Address, Current Balance, Income, and Salary
+            information automatically. Email, Phone, and Date of Birth must be
+            entered manually.
           </Alert>
 
           <input
@@ -856,7 +882,9 @@ function CustomerDetailsForm({
             >
               {isExtracting
                 ? 'Extracting Information...'
-                : `Upload ${applicantType === 'primary' ? 'Primary' : 'Joint'} Applicant Bank Statement`}
+                : `Upload ${
+                    applicantType === 'primary' ? 'Primary' : 'Joint'
+                  } Applicant Bank Statement`}
             </Button>
           </label>
 
@@ -870,48 +898,64 @@ function CustomerDetailsForm({
           )}
 
           {/* Show extracted data summary */}
-          {uploadMethod === 'bankStatement' && !isExtracting && (applicant.firstName || applicant.currentBalance) && (
-            <Card variant="outlined" sx={{ mb: 2, bgcolor: '#f8f9fa' }}>
-              <CardContent sx={{ py: 2 }}>
-                <Typography variant="body2" color="primary" gutterBottom fontWeight="bold">
-                  📄 Extracted from Bank Statement:
-                </Typography>
-                <Grid container spacing={1}>
-                  {applicant.firstName && (
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="body2">
-                        <strong>Name:</strong> {applicant.firstName} {applicant.lastName}
-                      </Typography>
-                    </Grid>
-                  )}
-                  {applicant.currentBalance && (
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="body2">
-                        <strong>Balance:</strong> €{applicant.currentBalance.toLocaleString()}
-                      </Typography>
-                    </Grid>
-                  )}
-                  {applicant.annualIncome && (
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="body2">
-                        <strong>Income:</strong> €{applicant.annualIncome.toLocaleString()}/year
-                      </Typography>
-                    </Grid>
-                  )}
-                  {applicant.monthlySalary && (
-                    <Grid item xs={6} sm={4}>
-                      <Typography variant="body2">
-                        <strong>Salary:</strong> €{applicant.monthlySalary.toLocaleString()}/month
-                      </Typography>
-                    </Grid>
-                  )}
-                </Grid>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.75rem' }}>
-                  All extracted values are editable. Please verify and update as needed.
-                </Typography>
-              </CardContent>
-            </Card>
-          )}
+          {uploadMethod === 'bankStatement' &&
+            !isExtracting &&
+            (applicant.firstName || applicant.currentBalance) && (
+              <Card variant="outlined" sx={{ mb: 2, bgcolor: '#f8f9fa' }}>
+                <CardContent sx={{ py: 2 }}>
+                  <Typography
+                    variant="body2"
+                    color="primary"
+                    gutterBottom
+                    fontWeight="bold"
+                  >
+                    📄 Extracted from Bank Statement:
+                  </Typography>
+                  <Grid container spacing={1}>
+                    {applicant.firstName && (
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body2">
+                          <strong>Name:</strong> {applicant.firstName}{' '}
+                          {applicant.lastName}
+                        </Typography>
+                      </Grid>
+                    )}
+                    {applicant.currentBalance && (
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body2">
+                          <strong>Balance:</strong> €
+                          {applicant.currentBalance.toLocaleString()}
+                        </Typography>
+                      </Grid>
+                    )}
+                    {applicant.annualIncome && (
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body2">
+                          <strong>Income:</strong> €
+                          {applicant.annualIncome.toLocaleString()}/year
+                        </Typography>
+                      </Grid>
+                    )}
+                    {applicant.monthlySalary && (
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body2">
+                          <strong>Salary:</strong> €
+                          {applicant.monthlySalary.toLocaleString()}/month
+                        </Typography>
+                      </Grid>
+                    )}
+                  </Grid>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 1, fontSize: '0.75rem' }}
+                  >
+                    All extracted values are editable. Please verify and update
+                    as needed.
+                  </Typography>
+                </CardContent>
+              </Card>
+            )}
         </Box>
       )}
 
@@ -922,10 +966,16 @@ function CustomerDetailsForm({
             fullWidth
             label="First Name"
             value={applicant.firstName}
-            onChange={(e) => handleInputChange('firstName', e.target.value, applicantType)}
+            onChange={(e) =>
+              handleInputChange('firstName', e.target.value, applicantType)
+            }
             required
             disabled={uploadMethod === 'bankStatement' && isExtracting}
-            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
+            helperText={
+              uploadMethod === 'bankStatement'
+                ? 'Auto-extracted from bank statement'
+                : ''
+            }
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -933,10 +983,16 @@ function CustomerDetailsForm({
             fullWidth
             label="Last Name"
             value={applicant.lastName}
-            onChange={(e) => handleInputChange('lastName', e.target.value, applicantType)}
+            onChange={(e) =>
+              handleInputChange('lastName', e.target.value, applicantType)
+            }
             required
             disabled={uploadMethod === 'bankStatement' && isExtracting}
-            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
+            helperText={
+              uploadMethod === 'bankStatement'
+                ? 'Auto-extracted from bank statement'
+                : ''
+            }
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -945,7 +1001,9 @@ function CustomerDetailsForm({
             label="Email"
             type="email"
             value={applicant.email}
-            onChange={(e) => handleInputChange('email', e.target.value, applicantType)}
+            onChange={(e) =>
+              handleInputChange('email', e.target.value, applicantType)
+            }
             required
             helperText="Manual input required"
           />
@@ -955,7 +1013,9 @@ function CustomerDetailsForm({
             fullWidth
             label="Phone"
             value={applicant.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value, applicantType)}
+            onChange={(e) =>
+              handleInputChange('phone', e.target.value, applicantType)
+            }
             required
             helperText="Manual input required"
           />
@@ -966,7 +1026,9 @@ function CustomerDetailsForm({
             label="Date of Birth"
             type="date"
             value={applicant.dateOfBirth}
-            onChange={(e) => handleInputChange('dateOfBirth', e.target.value, applicantType)}
+            onChange={(e) =>
+              handleInputChange('dateOfBirth', e.target.value, applicantType)
+            }
             InputLabelProps={{ shrink: true }}
             required
             helperText="Manual input required"
@@ -978,9 +1040,19 @@ function CustomerDetailsForm({
             label="Current Balance (€)"
             type="number"
             value={applicant.currentBalance || ''}
-            onChange={(e) => handleInputChange('currentBalance', parseFloat(e.target.value) || undefined, applicantType)}
+            onChange={(e) =>
+              handleInputChange(
+                'currentBalance',
+                parseFloat(e.target.value) || undefined,
+                applicantType
+              )
+            }
             disabled={uploadMethod === 'bankStatement' && isExtracting}
-            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
+            helperText={
+              uploadMethod === 'bankStatement'
+                ? 'Auto-extracted from bank statement'
+                : ''
+            }
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -989,9 +1061,19 @@ function CustomerDetailsForm({
             label="Annual Income (€)"
             type="number"
             value={applicant.annualIncome || ''}
-            onChange={(e) => handleInputChange('annualIncome', parseFloat(e.target.value) || undefined, applicantType)}
+            onChange={(e) =>
+              handleInputChange(
+                'annualIncome',
+                parseFloat(e.target.value) || undefined,
+                applicantType
+              )
+            }
             disabled={uploadMethod === 'bankStatement' && isExtracting}
-            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
+            helperText={
+              uploadMethod === 'bankStatement'
+                ? 'Auto-extracted from bank statement'
+                : ''
+            }
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -1000,9 +1082,19 @@ function CustomerDetailsForm({
             label="Monthly Salary (€)"
             type="number"
             value={applicant.monthlySalary || ''}
-            onChange={(e) => handleInputChange('monthlySalary', parseFloat(e.target.value) || undefined, applicantType)}
+            onChange={(e) =>
+              handleInputChange(
+                'monthlySalary',
+                parseFloat(e.target.value) || undefined,
+                applicantType
+              )
+            }
             disabled={uploadMethod === 'bankStatement' && isExtracting}
-            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
+            helperText={
+              uploadMethod === 'bankStatement'
+                ? 'Auto-extracted from bank statement'
+                : ''
+            }
           />
         </Grid>
         <Grid item xs={12}>
@@ -1012,10 +1104,16 @@ function CustomerDetailsForm({
             multiline
             rows={2}
             value={applicant.address}
-            onChange={(e) => handleInputChange('address', e.target.value, applicantType)}
+            onChange={(e) =>
+              handleInputChange('address', e.target.value, applicantType)
+            }
             required
             disabled={uploadMethod === 'bankStatement' && isExtracting}
-            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
+            helperText={
+              uploadMethod === 'bankStatement'
+                ? 'Auto-extracted from bank statement'
+                : ''
+            }
           />
         </Grid>
       </Grid>
@@ -1029,7 +1127,8 @@ function CustomerDetailsForm({
         <Typography variant="h5">Customer Details</Typography>
       </Box>
       <Alert severity="info" sx={{ mb: 3 }}>
-        You've selected: <strong>{product.name}</strong>. Please provide your details to continue.
+        You've selected: <strong>{product.name}</strong>. Please provide your
+        details to continue.
       </Alert>
 
       {/* Application Type Selection */}
@@ -1041,7 +1140,9 @@ function CustomerDetailsForm({
           <InputLabel>Select Application Type</InputLabel>
           <Select
             value={applicationType}
-            onChange={(e) => setApplicationType(e.target.value as 'single' | 'joint')}
+            onChange={(e) =>
+              setApplicationType(e.target.value as 'single' | 'joint')
+            }
             label="Select Application Type"
           >
             <MenuItem value="single">Single Application</MenuItem>
@@ -1390,8 +1491,11 @@ function DocumentUploadStep({
   const [jointUploadedDocs, setJointUploadedDocs] = useState<string[]>([]);
 
   const isJointApplication = customerData.isJoint;
-  const totalRequiredDocs = isJointApplication ? requiredDocs.length * 2 : requiredDocs.length;
-  const totalUploadedDocs = primaryUploadedDocs.length + jointUploadedDocs.length;
+  const totalRequiredDocs = isJointApplication
+    ? requiredDocs.length * 2
+    : requiredDocs.length;
+  const totalUploadedDocs =
+    primaryUploadedDocs.length + jointUploadedDocs.length;
 
   const handleDocUpload = (doc: string, applicantType: 'primary' | 'joint') => {
     if (applicantType === 'primary') {
@@ -1408,21 +1512,29 @@ function DocumentUploadStep({
   const handleSubmit = () => {
     // Combine both primary and joint documents with proper identification
     const allDocs = [
-      ...primaryUploadedDocs.map(doc => `Primary Applicant - ${doc}`),
-      ...jointUploadedDocs.map(doc => `Joint Applicant - ${doc}`)
+      ...primaryUploadedDocs.map((doc) => `Primary Applicant - ${doc}`),
+      ...jointUploadedDocs.map((doc) => `Joint Applicant - ${doc}`),
     ];
     onSubmit(allDocs);
   };
 
-  const renderDocumentSection = (applicantType: 'primary' | 'joint', applicantName: string) => {
-    const uploadedDocs = applicantType === 'primary' ? primaryUploadedDocs : jointUploadedDocs;
-    
+  const renderDocumentSection = (
+    applicantType: 'primary' | 'joint',
+    applicantName: string
+  ) => {
+    const uploadedDocs =
+      applicantType === 'primary' ? primaryUploadedDocs : jointUploadedDocs;
+
     return (
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h6" gutterBottom sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{ color: '#1976d2', fontWeight: 'bold' }}
+        >
           {applicantName} Documents
         </Typography>
-        
+
         <Grid container spacing={2}>
           {requiredDocs.map((doc) => (
             <Grid item xs={12} md={6} key={`${applicantType}_${doc}`}>
@@ -1434,7 +1546,11 @@ function DocumentUploadStep({
                   <Typography variant="body2" color="text.secondary">
                     Required for verification
                   </Typography>
-                  <Typography variant="body2" color="primary" sx={{ mt: 1, fontSize: '0.8rem' }}>
+                  <Typography
+                    variant="body2"
+                    color="primary"
+                    sx={{ mt: 1, fontSize: '0.8rem' }}
+                  >
                     For: {applicantName}
                   </Typography>
                 </CardContent>
@@ -1466,7 +1582,8 @@ function DocumentUploadStep({
             sx={{ mb: 1 }}
           />
           <Typography variant="body2" textAlign="center" color="text.secondary">
-            {uploadedDocs.length} of {requiredDocs.length} documents uploaded for {applicantName}
+            {uploadedDocs.length} of {requiredDocs.length} documents uploaded
+            for {applicantName}
           </Typography>
         </Box>
       </Box>
@@ -1481,10 +1598,13 @@ function DocumentUploadStep({
       </Box>
 
       <Alert severity="info" sx={{ mb: 3 }}>
-        Please upload the following documents for your {product.name} application.
+        Please upload the following documents for your {product.name}{' '}
+        application.
         {isJointApplication && (
-          <><br />
-          <strong>Joint Application:</strong> Documents are required for both applicants.
+          <>
+            <br />
+            <strong>Joint Application:</strong> Documents are required for both
+            applicants.
           </>
         )}
       </Alert>
@@ -1499,22 +1619,27 @@ function DocumentUploadStep({
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">
-            {isJointApplication 
+            {isJointApplication
               ? `Documents required for both ${customerData.firstName} ${customerData.lastName} and ${customerData.jointApplicant?.firstName} ${customerData.jointApplicant?.lastName}`
-              : `Documents required for ${customerData.firstName} ${customerData.lastName}`
-            }
+              : `Documents required for ${customerData.firstName} ${customerData.lastName}`}
           </Typography>
         </CardContent>
       </Card>
 
       {/* Primary Applicant Documents */}
-      {renderDocumentSection('primary', `${customerData.firstName} ${customerData.lastName} (Primary)`)}
+      {renderDocumentSection(
+        'primary',
+        `${customerData.firstName} ${customerData.lastName} (Primary)`
+      )}
 
       {/* Joint Applicant Documents */}
       {isJointApplication && customerData.jointApplicant && (
         <>
           <Divider sx={{ my: 4 }} />
-          {renderDocumentSection('joint', `${customerData.jointApplicant.firstName} ${customerData.jointApplicant.lastName} (Joint)`)}
+          {renderDocumentSection(
+            'joint',
+            `${customerData.jointApplicant.firstName} ${customerData.jointApplicant.lastName} (Joint)`
+          )}
         </>
       )}
 
@@ -1533,11 +1658,14 @@ function DocumentUploadStep({
             <Typography variant="body1" textAlign="center" fontWeight="bold">
               {totalUploadedDocs} of {totalRequiredDocs} documents uploaded
             </Typography>
-            <Typography variant="body2" textAlign="center" color="text.secondary">
-              {isJointApplication 
+            <Typography
+              variant="body2"
+              textAlign="center"
+              color="text.secondary"
+            >
+              {isJointApplication
                 ? `${requiredDocs.length} documents per applicant (${requiredDocs.length} × 2 applicants = ${totalRequiredDocs} total)`
-                : `${requiredDocs.length} documents required`
-              }
+                : `${requiredDocs.length} documents required`}
             </Typography>
           </CardContent>
         </Card>
@@ -1753,16 +1881,18 @@ function AgreementStep({
   const [jointSigned, setJointSigned] = useState(false);
 
   const isJointApplication = customerData.isJoint;
-  const allDocumentsSigned = isJointApplication ? (primarySigned && jointSigned) : primarySigned;
+  const allDocumentsSigned = isJointApplication
+    ? primarySigned && jointSigned
+    : primarySigned;
 
   const handlePrimarySign = () => {
     setPrimarySigning(true);
-    
+
     // Simulate DocuSign email process
     setTimeout(() => {
       setPrimarySigning(false);
       setPrimarySigned(true);
-      
+
       // If single application, complete the process
       if (!isJointApplication) {
         setTimeout(() => {
@@ -1774,12 +1904,12 @@ function AgreementStep({
 
   const handleJointSign = () => {
     setJointSigning(true);
-    
+
     // Simulate DocuSign email process
     setTimeout(() => {
       setJointSigning(false);
       setJointSigned(true);
-      
+
       // Check if both applicants have signed
       if (primarySigned) {
         setTimeout(() => {
@@ -1793,14 +1923,19 @@ function AgreementStep({
     <Paper sx={{ p: 4 }}>
       <Box display="flex" alignItems="center" gap={2} mb={3}>
         <Description color="primary" />
-        <Typography variant="h5">Credit Agreement - DocuSign Verification</Typography>
+        <Typography variant="h5">
+          Credit Agreement - DocuSign Verification
+        </Typography>
       </Box>
 
       <Alert severity="success" sx={{ mb: 3 }}>
-        Your {product.name} application has been approved! Please review and sign the agreement via DocuSign.
+        Your {product.name} application has been approved! Please review and
+        sign the agreement via DocuSign.
         {isJointApplication && (
-          <><br />
-          <strong>Joint Application:</strong> Both applicants must sign the agreement.
+          <>
+            <br />
+            <strong>Joint Application:</strong> Both applicants must sign the
+            agreement.
           </>
         )}
       </Alert>
@@ -1811,14 +1946,15 @@ function AgreementStep({
           <Box display="flex" alignItems="center" gap={2} mb={2}>
             <Person color="primary" />
             <Typography variant="h6">
-              {isJointApplication ? 'Joint Application Signing' : 'Single Application Signing'}
+              {isJointApplication
+                ? 'Joint Application Signing'
+                : 'Single Application Signing'}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">
-            {isJointApplication 
+            {isJointApplication
               ? `DocuSign verification required for both ${customerData.firstName} ${customerData.lastName} and ${customerData.jointApplicant?.firstName} ${customerData.jointApplicant?.lastName}`
-              : `DocuSign verification required for ${customerData.firstName} ${customerData.lastName}`
-            }
+              : `DocuSign verification required for ${customerData.firstName} ${customerData.lastName}`}
           </Typography>
         </CardContent>
       </Card>
@@ -1874,10 +2010,14 @@ function AgreementStep({
 
       {/* Primary Applicant DocuSign */}
       <Box mb={3}>
-        <Typography variant="h6" gutterBottom sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{ color: '#1976d2', fontWeight: 'bold' }}
+        >
           Primary Applicant Signature
         </Typography>
-        
+
         <Card variant="outlined" sx={{ mb: 2 }}>
           <CardContent>
             <Box display="flex" alignItems="center" gap={2} mb={2}>
@@ -1891,7 +2031,7 @@ function AgreementStep({
                 </Typography>
               </Box>
             </Box>
-            
+
             {!primarySigned && !primarySigning && (
               <Button
                 variant="contained"
@@ -1908,7 +2048,9 @@ function AgreementStep({
             {primarySigning && (
               <Box>
                 <Alert severity="info" sx={{ mb: 2 }}>
-                  <strong>DocuSign Sent!</strong> Please check your email ({customerData.email}) and follow the DocuSign instructions to complete the signature.
+                  <strong>DocuSign Sent!</strong> Please check your email (
+                  {customerData.email}) and follow the DocuSign instructions to
+                  complete the signature.
                 </Alert>
                 <Box display="flex" alignItems="center" gap={2}>
                   <LinearProgress sx={{ flexGrow: 1 }} />
@@ -1922,7 +2064,8 @@ function AgreementStep({
             {primarySigned && (
               <Alert severity="success">
                 <CheckCircle sx={{ mr: 1 }} />
-                <strong>Signed Successfully!</strong> Primary applicant has completed DocuSign verification.
+                <strong>Signed Successfully!</strong> Primary applicant has
+                completed DocuSign verification.
               </Alert>
             )}
           </CardContent>
@@ -1932,24 +2075,29 @@ function AgreementStep({
       {/* Joint Applicant DocuSign */}
       {isJointApplication && customerData.jointApplicant && (
         <Box mb={3}>
-          <Typography variant="h6" gutterBottom sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{ color: '#1976d2', fontWeight: 'bold' }}
+          >
             Joint Applicant Signature
           </Typography>
-          
+
           <Card variant="outlined" sx={{ mb: 2 }}>
             <CardContent>
               <Box display="flex" alignItems="center" gap={2} mb={2}>
                 <Person color="primary" />
                 <Box>
                   <Typography variant="body1" fontWeight="bold">
-                    {customerData.jointApplicant.firstName} {customerData.jointApplicant.lastName}
+                    {customerData.jointApplicant.firstName}{' '}
+                    {customerData.jointApplicant.lastName}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Email: {customerData.jointApplicant.email}
                   </Typography>
                 </Box>
               </Box>
-              
+
               {!jointSigned && !jointSigning && (
                 <Button
                   variant="contained"
@@ -1966,7 +2114,9 @@ function AgreementStep({
               {jointSigning && (
                 <Box>
                   <Alert severity="info" sx={{ mb: 2 }}>
-                    <strong>DocuSign Sent!</strong> Please check your email ({customerData.jointApplicant.email}) and follow the DocuSign instructions to complete the signature.
+                    <strong>DocuSign Sent!</strong> Please check your email (
+                    {customerData.jointApplicant.email}) and follow the DocuSign
+                    instructions to complete the signature.
                   </Alert>
                   <Box display="flex" alignItems="center" gap={2}>
                     <LinearProgress sx={{ flexGrow: 1 }} />
@@ -1980,13 +2130,15 @@ function AgreementStep({
               {jointSigned && (
                 <Alert severity="success">
                   <CheckCircle sx={{ mr: 1 }} />
-                  <strong>Signed Successfully!</strong> Joint applicant has completed DocuSign verification.
+                  <strong>Signed Successfully!</strong> Joint applicant has
+                  completed DocuSign verification.
                 </Alert>
               )}
 
               {!primarySigned && (
                 <Alert severity="warning" sx={{ mt: 2 }}>
-                  Primary applicant must sign first before joint applicant can proceed.
+                  Primary applicant must sign first before joint applicant can
+                  proceed.
                 </Alert>
               )}
             </CardContent>
@@ -2003,22 +2155,29 @@ function AgreementStep({
             </Typography>
             <LinearProgress
               variant="determinate"
-              value={isJointApplication 
-                ? ((primarySigned ? 1 : 0) + (jointSigned ? 1 : 0)) * 50
-                : primarySigned ? 100 : 0
+              value={
+                isJointApplication
+                  ? ((primarySigned ? 1 : 0) + (jointSigned ? 1 : 0)) * 50
+                  : primarySigned
+                  ? 100
+                  : 0
               }
               sx={{ mb: 2, height: 8, borderRadius: 4 }}
             />
             <Typography variant="body1" textAlign="center" fontWeight="bold">
-              {isJointApplication 
-                ? `${(primarySigned ? 1 : 0) + (jointSigned ? 1 : 0)} of 2 signatures completed`
-                : primarySigned ? 'Signature completed' : 'Waiting for signature'
-              }
+              {isJointApplication
+                ? `${
+                    (primarySigned ? 1 : 0) + (jointSigned ? 1 : 0)
+                  } of 2 signatures completed`
+                : primarySigned
+                ? 'Signature completed'
+                : 'Waiting for signature'}
             </Typography>
-            
+
             {allDocumentsSigned && (
               <Alert severity="success" sx={{ mt: 2 }}>
-                <strong>All Signatures Complete!</strong> Processing your application...
+                <strong>All Signatures Complete!</strong> Processing your
+                application...
               </Alert>
             )}
           </CardContent>
@@ -2138,7 +2297,7 @@ function AIChatInterface({
     >
       <Box display="flex" alignItems="center" gap={2} mb={3}>
         <SmartToy color="primary" sx={{ fontSize: 32 }} />
-        <Typography variant="h5">AIB Banking Assistant</Typography>
+        <Typography variant="h5">Personal Banking Assistant</Typography>
         <Chip label="Live Chat" color="success" size="small" />
       </Box>
 
