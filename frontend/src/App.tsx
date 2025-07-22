@@ -39,7 +39,7 @@ import {
   Person,
   Description,
   Gavel,
-  Payment,
+  Email,
   ArrowForward,
   CloudUpload,
   Autorenew,
@@ -89,6 +89,9 @@ interface CustomerData {
   phone: string;
   dateOfBirth: string;
   address: string;
+  currentBalance?: number;
+  annualIncome?: number;
+  monthlySalary?: number;
   isExistingCustomer: boolean;
   isJoint?: boolean;
   jointApplicant?: CustomerData;
@@ -576,6 +579,7 @@ function App() {
           <DocumentUploadStep
             product={selectedProduct}
             requiredDocs={requiredDocuments[selectedProduct.id]}
+            customerData={customerData!}
             onSubmit={handleDocumentsSubmit}
           />
         </Box>
@@ -619,6 +623,7 @@ function App() {
           <AgreementStep
             product={selectedProduct!}
             applicationRef={applicationRef}
+            customerData={customerData!}
             onSign={handleAgreementSign}
           />
         </Box>
@@ -651,6 +656,9 @@ function CustomerDetailsForm({
     phone: '',
     dateOfBirth: '',
     address: '',
+    currentBalance: undefined,
+    annualIncome: undefined,
+    monthlySalary: undefined,
     isExistingCustomer: false,
   });
   const [jointApplicant, setJointApplicant] = useState<CustomerData>({
@@ -660,6 +668,9 @@ function CustomerDetailsForm({
     phone: '',
     dateOfBirth: '',
     address: '',
+    currentBalance: undefined,
+    annualIncome: undefined,
+    monthlySalary: undefined,
     isExistingCustomer: false,
   });
 
@@ -685,10 +696,13 @@ function CustomerDetailsForm({
         const extractedData = {
           firstName: applicantType === 'primary' ? 'Rajat' : 'Sarah',
           lastName: applicantType === 'primary' ? 'Maheshwari' : 'Johnson',
-          email: applicantType === 'primary' ? 'rajat.m@email.com' : 'sarah.j@email.com',
-          phone: applicantType === 'primary' ? '+353 89 123 4567' : '+353 89 765 4321',
-          dateOfBirth: applicantType === 'primary' ? '1984-03-01' : '1987-07-15',
+          email: '', // Manual input only
+          phone: '', // Manual input only
+          dateOfBirth: '', // Manual input only
           address: applicantType === 'primary' ? '123 Grafton Street, Dublin 2, Ireland' : '456 O\'Connell Street, Dublin 1, Ireland',
+          currentBalance: applicantType === 'primary' ? 15420.50 : 8750.25,
+          annualIncome: applicantType === 'primary' ? 65000 : 48000,
+          monthlySalary: applicantType === 'primary' ? 5416.67 : 4000,
           isExistingCustomer: false,
         };
 
@@ -705,7 +719,7 @@ function CustomerDetailsForm({
 
   const handleInputChange = (
     field: keyof CustomerData,
-    value: string | boolean,
+    value: string | boolean | number | undefined,
     applicantType: 'primary' | 'joint'
   ) => {
     if (applicantType === 'primary') {
@@ -815,7 +829,7 @@ function CustomerDetailsForm({
       {uploadMethod === 'bankStatement' && (
         <Box sx={{ mb: 3 }}>
           <Alert severity="success" sx={{ mb: 2 }}>
-            <strong>Smart Data Extraction:</strong> Upload bank statement and we'll extract the information automatically.
+            <strong>Smart Data Extraction:</strong> Upload bank statement and we'll extract Name, Address, Current Balance, Income, and Salary information automatically. Email, Phone, and Date of Birth must be entered manually.
           </Alert>
 
           <input
@@ -854,6 +868,50 @@ function CustomerDetailsForm({
               <LinearProgress />
             </Box>
           )}
+
+          {/* Show extracted data summary */}
+          {uploadMethod === 'bankStatement' && !isExtracting && (applicant.firstName || applicant.currentBalance) && (
+            <Card variant="outlined" sx={{ mb: 2, bgcolor: '#f8f9fa' }}>
+              <CardContent sx={{ py: 2 }}>
+                <Typography variant="body2" color="primary" gutterBottom fontWeight="bold">
+                  📄 Extracted from Bank Statement:
+                </Typography>
+                <Grid container spacing={1}>
+                  {applicant.firstName && (
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body2">
+                        <strong>Name:</strong> {applicant.firstName} {applicant.lastName}
+                      </Typography>
+                    </Grid>
+                  )}
+                  {applicant.currentBalance && (
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body2">
+                        <strong>Balance:</strong> €{applicant.currentBalance.toLocaleString()}
+                      </Typography>
+                    </Grid>
+                  )}
+                  {applicant.annualIncome && (
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body2">
+                        <strong>Income:</strong> €{applicant.annualIncome.toLocaleString()}/year
+                      </Typography>
+                    </Grid>
+                  )}
+                  {applicant.monthlySalary && (
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body2">
+                        <strong>Salary:</strong> €{applicant.monthlySalary.toLocaleString()}/month
+                      </Typography>
+                    </Grid>
+                  )}
+                </Grid>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontSize: '0.75rem' }}>
+                  All extracted values are editable. Please verify and update as needed.
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
         </Box>
       )}
 
@@ -866,7 +924,8 @@ function CustomerDetailsForm({
             value={applicant.firstName}
             onChange={(e) => handleInputChange('firstName', e.target.value, applicantType)}
             required
-            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.firstName}
+            disabled={uploadMethod === 'bankStatement' && isExtracting}
+            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -876,7 +935,8 @@ function CustomerDetailsForm({
             value={applicant.lastName}
             onChange={(e) => handleInputChange('lastName', e.target.value, applicantType)}
             required
-            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.lastName}
+            disabled={uploadMethod === 'bankStatement' && isExtracting}
+            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -887,7 +947,7 @@ function CustomerDetailsForm({
             value={applicant.email}
             onChange={(e) => handleInputChange('email', e.target.value, applicantType)}
             required
-            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.email}
+            helperText="Manual input required"
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -897,7 +957,7 @@ function CustomerDetailsForm({
             value={applicant.phone}
             onChange={(e) => handleInputChange('phone', e.target.value, applicantType)}
             required
-            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.phone}
+            helperText="Manual input required"
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -909,7 +969,40 @@ function CustomerDetailsForm({
             onChange={(e) => handleInputChange('dateOfBirth', e.target.value, applicantType)}
             InputLabelProps={{ shrink: true }}
             required
-            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.dateOfBirth}
+            helperText="Manual input required"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Current Balance (€)"
+            type="number"
+            value={applicant.currentBalance || ''}
+            onChange={(e) => handleInputChange('currentBalance', parseFloat(e.target.value) || undefined, applicantType)}
+            disabled={uploadMethod === 'bankStatement' && isExtracting}
+            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Annual Income (€)"
+            type="number"
+            value={applicant.annualIncome || ''}
+            onChange={(e) => handleInputChange('annualIncome', parseFloat(e.target.value) || undefined, applicantType)}
+            disabled={uploadMethod === 'bankStatement' && isExtracting}
+            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Monthly Salary (€)"
+            type="number"
+            value={applicant.monthlySalary || ''}
+            onChange={(e) => handleInputChange('monthlySalary', parseFloat(e.target.value) || undefined, applicantType)}
+            disabled={uploadMethod === 'bankStatement' && isExtracting}
+            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
           />
         </Grid>
         <Grid item xs={12}>
@@ -921,7 +1014,8 @@ function CustomerDetailsForm({
             value={applicant.address}
             onChange={(e) => handleInputChange('address', e.target.value, applicantType)}
             required
-            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.address}
+            disabled={uploadMethod === 'bankStatement' && isExtracting}
+            helperText={uploadMethod === 'bankStatement' ? "Auto-extracted from bank statement" : ""}
           />
         </Grid>
       </Grid>
@@ -1284,22 +1378,99 @@ function ApplicationDetailsForm({
 function DocumentUploadStep({
   product,
   requiredDocs,
+  customerData,
   onSubmit,
 }: {
   product: Product;
   requiredDocs: string[];
+  customerData: CustomerData;
   onSubmit: (docs: string[]) => void;
 }) {
-  const [uploadedDocs, setUploadedDocs] = useState<string[]>([]);
+  const [primaryUploadedDocs, setPrimaryUploadedDocs] = useState<string[]>([]);
+  const [jointUploadedDocs, setJointUploadedDocs] = useState<string[]>([]);
 
-  const handleDocUpload = (doc: string) => {
-    if (!uploadedDocs.includes(doc)) {
-      setUploadedDocs((prev) => [...prev, doc]);
+  const isJointApplication = customerData.isJoint;
+  const totalRequiredDocs = isJointApplication ? requiredDocs.length * 2 : requiredDocs.length;
+  const totalUploadedDocs = primaryUploadedDocs.length + jointUploadedDocs.length;
+
+  const handleDocUpload = (doc: string, applicantType: 'primary' | 'joint') => {
+    if (applicantType === 'primary') {
+      if (!primaryUploadedDocs.includes(doc)) {
+        setPrimaryUploadedDocs((prev) => [...prev, doc]);
+      }
+    } else {
+      if (!jointUploadedDocs.includes(doc)) {
+        setJointUploadedDocs((prev) => [...prev, doc]);
+      }
     }
   };
 
   const handleSubmit = () => {
-    onSubmit(uploadedDocs);
+    // Combine both primary and joint documents with proper identification
+    const allDocs = [
+      ...primaryUploadedDocs.map(doc => `Primary Applicant - ${doc}`),
+      ...jointUploadedDocs.map(doc => `Joint Applicant - ${doc}`)
+    ];
+    onSubmit(allDocs);
+  };
+
+  const renderDocumentSection = (applicantType: 'primary' | 'joint', applicantName: string) => {
+    const uploadedDocs = applicantType === 'primary' ? primaryUploadedDocs : jointUploadedDocs;
+    
+    return (
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" gutterBottom sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+          {applicantName} Documents
+        </Typography>
+        
+        <Grid container spacing={2}>
+          {requiredDocs.map((doc) => (
+            <Grid item xs={12} md={6} key={`${applicantType}_${doc}`}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    {doc}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Required for verification
+                  </Typography>
+                  <Typography variant="body2" color="primary" sx={{ mt: 1, fontSize: '0.8rem' }}>
+                    For: {applicantName}
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button
+                    variant={
+                      uploadedDocs.includes(doc) ? 'contained' : 'outlined'
+                    }
+                    color={uploadedDocs.includes(doc) ? 'success' : 'primary'}
+                    onClick={() => handleDocUpload(doc, applicantType)}
+                    startIcon={
+                      uploadedDocs.includes(doc) ? <CheckCircle /> : null
+                    }
+                    fullWidth
+                  >
+                    {uploadedDocs.includes(doc) ? 'Uploaded' : 'Upload'}
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Progress for this applicant */}
+        <Box mt={2}>
+          <LinearProgress
+            variant="determinate"
+            value={(uploadedDocs.length / requiredDocs.length) * 100}
+            sx={{ mb: 1 }}
+          />
+          <Typography variant="body2" textAlign="center" color="text.secondary">
+            {uploadedDocs.length} of {requiredDocs.length} documents uploaded for {applicantName}
+          </Typography>
+        </Box>
+      </Box>
+    );
   };
 
   return (
@@ -1310,60 +1481,81 @@ function DocumentUploadStep({
       </Box>
 
       <Alert severity="info" sx={{ mb: 3 }}>
-        Please upload the following documents for your {product.name}{' '}
-        application:
+        Please upload the following documents for your {product.name} application.
+        {isJointApplication && (
+          <><br />
+          <strong>Joint Application:</strong> Documents are required for both applicants.
+          </>
+        )}
       </Alert>
 
-      <Grid container spacing={2}>
-        {requiredDocs.map((doc) => (
-          <Grid item xs={12} md={6} key={doc}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  {doc}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Required for verification
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button
-                  variant={
-                    uploadedDocs.includes(doc) ? 'contained' : 'outlined'
-                  }
-                  color={uploadedDocs.includes(doc) ? 'success' : 'primary'}
-                  onClick={() => handleDocUpload(doc)}
-                  startIcon={
-                    uploadedDocs.includes(doc) ? <CheckCircle /> : null
-                  }
-                >
-                  {uploadedDocs.includes(doc) ? 'Uploaded' : 'Upload'}
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      {/* Application Type Summary */}
+      <Card variant="outlined" sx={{ mb: 4, bgcolor: '#f8f9fa' }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" gap={2} mb={2}>
+            <Person color="primary" />
+            <Typography variant="h6">
+              {isJointApplication ? 'Joint Application' : 'Single Application'}
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            {isJointApplication 
+              ? `Documents required for both ${customerData.firstName} ${customerData.lastName} and ${customerData.jointApplicant?.firstName} ${customerData.jointApplicant?.lastName}`
+              : `Documents required for ${customerData.firstName} ${customerData.lastName}`
+            }
+          </Typography>
+        </CardContent>
+      </Card>
 
+      {/* Primary Applicant Documents */}
+      {renderDocumentSection('primary', `${customerData.firstName} ${customerData.lastName} (Primary)`)}
+
+      {/* Joint Applicant Documents */}
+      {isJointApplication && customerData.jointApplicant && (
+        <>
+          <Divider sx={{ my: 4 }} />
+          {renderDocumentSection('joint', `${customerData.jointApplicant.firstName} ${customerData.jointApplicant.lastName} (Joint)`)}
+        </>
+      )}
+
+      {/* Overall Progress and Submit */}
       <Box mt={4}>
-        <LinearProgress
-          variant="determinate"
-          value={(uploadedDocs.length / requiredDocs.length) * 100}
-          sx={{ mb: 2 }}
-        />
-        <Typography variant="body2" textAlign="center" gutterBottom>
-          {uploadedDocs.length} of {requiredDocs.length} documents uploaded
-        </Typography>
+        <Card variant="outlined" sx={{ bgcolor: '#e3f2fd', mb: 3 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom color="primary">
+              Overall Upload Progress
+            </Typography>
+            <LinearProgress
+              variant="determinate"
+              value={(totalUploadedDocs / totalRequiredDocs) * 100}
+              sx={{ mb: 2, height: 8, borderRadius: 4 }}
+            />
+            <Typography variant="body1" textAlign="center" fontWeight="bold">
+              {totalUploadedDocs} of {totalRequiredDocs} documents uploaded
+            </Typography>
+            <Typography variant="body2" textAlign="center" color="text.secondary">
+              {isJointApplication 
+                ? `${requiredDocs.length} documents per applicant (${requiredDocs.length} × 2 applicants = ${totalRequiredDocs} total)`
+                : `${requiredDocs.length} documents required`
+              }
+            </Typography>
+          </CardContent>
+        </Card>
 
         <Button
           variant="contained"
           size="large"
           fullWidth
-          disabled={uploadedDocs.length < requiredDocs.length}
+          disabled={totalUploadedDocs < totalRequiredDocs}
           onClick={handleSubmit}
           endIcon={<ArrowForward />}
+          sx={{
+            bgcolor: '#1976d2',
+            '&:hover': { bgcolor: '#1565c0' },
+            py: 1.5,
+          }}
         >
-          Continue to Review
+          Continue to Review ({totalUploadedDocs}/{totalRequiredDocs} Complete)
         </Button>
       </Box>
     </Paper>
@@ -1546,33 +1738,90 @@ function ReviewDecisionStep({
 function AgreementStep({
   product,
   applicationRef,
+  customerData,
   onSign,
 }: {
   product: Product;
   applicationRef: string;
+  customerData: CustomerData;
   onSign: () => void;
 }) {
   const [agreed, setAgreed] = useState(false);
-  const [signing, setSigning] = useState(false);
+  const [primarySigning, setPrimarySigning] = useState(false);
+  const [jointSigning, setJointSigning] = useState(false);
+  const [primarySigned, setPrimarySigned] = useState(false);
+  const [jointSigned, setJointSigned] = useState(false);
 
-  const handleSign = () => {
-    setSigning(true);
+  const isJointApplication = customerData.isJoint;
+  const allDocumentsSigned = isJointApplication ? (primarySigned && jointSigned) : primarySigned;
+
+  const handlePrimarySign = () => {
+    setPrimarySigning(true);
+    
+    // Simulate DocuSign email process
     setTimeout(() => {
-      onSign();
-    }, 2000);
+      setPrimarySigning(false);
+      setPrimarySigned(true);
+      
+      // If single application, complete the process
+      if (!isJointApplication) {
+        setTimeout(() => {
+          onSign();
+        }, 1000);
+      }
+    }, 3000);
+  };
+
+  const handleJointSign = () => {
+    setJointSigning(true);
+    
+    // Simulate DocuSign email process
+    setTimeout(() => {
+      setJointSigning(false);
+      setJointSigned(true);
+      
+      // Check if both applicants have signed
+      if (primarySigned) {
+        setTimeout(() => {
+          onSign();
+        }, 1000);
+      }
+    }, 3000);
   };
 
   return (
     <Paper sx={{ p: 4 }}>
       <Box display="flex" alignItems="center" gap={2} mb={3}>
         <Description color="primary" />
-        <Typography variant="h5">Credit Agreement</Typography>
+        <Typography variant="h5">Credit Agreement - DocuSign Verification</Typography>
       </Box>
 
       <Alert severity="success" sx={{ mb: 3 }}>
-        Your {product.name} application has been approved! Please review and
-        sign the agreement.
+        Your {product.name} application has been approved! Please review and sign the agreement via DocuSign.
+        {isJointApplication && (
+          <><br />
+          <strong>Joint Application:</strong> Both applicants must sign the agreement.
+          </>
+        )}
       </Alert>
+
+      {/* Application Type Summary */}
+      <Card variant="outlined" sx={{ mb: 4, bgcolor: '#f8f9fa' }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" gap={2} mb={2}>
+            <Person color="primary" />
+            <Typography variant="h6">
+              {isJointApplication ? 'Joint Application Signing' : 'Single Application Signing'}
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            {isJointApplication 
+              ? `DocuSign verification required for both ${customerData.firstName} ${customerData.lastName} and ${customerData.jointApplicant?.firstName} ${customerData.jointApplicant?.lastName}`
+              : `DocuSign verification required for ${customerData.firstName} ${customerData.lastName}`
+            }
+          </Typography>
+        </CardContent>
+      </Card>
 
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
@@ -1608,37 +1857,172 @@ function AgreementStep({
         </CardContent>
       </Card>
 
+      {/* Terms Agreement */}
       <Box mb={3}>
         <Button
           variant="outlined"
           onClick={() => setAgreed(!agreed)}
           startIcon={agreed ? <CheckCircle color="success" /> : null}
           fullWidth
+          sx={{ mb: 2 }}
         >
           {agreed
-            ? 'Agreement Accepted'
+            ? 'Terms and Conditions Accepted'
             : 'I agree to the terms and conditions'}
         </Button>
       </Box>
 
-      {!signing ? (
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          disabled={!agreed}
-          onClick={handleSign}
-          startIcon={<Payment />}
-        >
-          Sign Agreement (DocuSign)
-        </Button>
-      ) : (
-        <Box textAlign="center">
-          <LinearProgress sx={{ mb: 2 }} />
-          <Typography variant="body1">
-            Processing digital signature...
+      {/* Primary Applicant DocuSign */}
+      <Box mb={3}>
+        <Typography variant="h6" gutterBottom sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+          Primary Applicant Signature
+        </Typography>
+        
+        <Card variant="outlined" sx={{ mb: 2 }}>
+          <CardContent>
+            <Box display="flex" alignItems="center" gap={2} mb={2}>
+              <Person color="primary" />
+              <Box>
+                <Typography variant="body1" fontWeight="bold">
+                  {customerData.firstName} {customerData.lastName}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Email: {customerData.email}
+                </Typography>
+              </Box>
+            </Box>
+            
+            {!primarySigned && !primarySigning && (
+              <Button
+                variant="contained"
+                onClick={handlePrimarySign}
+                disabled={!agreed}
+                startIcon={<Email />}
+                fullWidth
+                sx={{ bgcolor: '#1976d2' }}
+              >
+                Send DocuSign to Primary Applicant
+              </Button>
+            )}
+
+            {primarySigning && (
+              <Box>
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  <strong>DocuSign Sent!</strong> Please check your email ({customerData.email}) and follow the DocuSign instructions to complete the signature.
+                </Alert>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <LinearProgress sx={{ flexGrow: 1 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Waiting for signature...
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+
+            {primarySigned && (
+              <Alert severity="success">
+                <CheckCircle sx={{ mr: 1 }} />
+                <strong>Signed Successfully!</strong> Primary applicant has completed DocuSign verification.
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Joint Applicant DocuSign */}
+      {isJointApplication && customerData.jointApplicant && (
+        <Box mb={3}>
+          <Typography variant="h6" gutterBottom sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+            Joint Applicant Signature
           </Typography>
+          
+          <Card variant="outlined" sx={{ mb: 2 }}>
+            <CardContent>
+              <Box display="flex" alignItems="center" gap={2} mb={2}>
+                <Person color="primary" />
+                <Box>
+                  <Typography variant="body1" fontWeight="bold">
+                    {customerData.jointApplicant.firstName} {customerData.jointApplicant.lastName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Email: {customerData.jointApplicant.email}
+                  </Typography>
+                </Box>
+              </Box>
+              
+              {!jointSigned && !jointSigning && (
+                <Button
+                  variant="contained"
+                  onClick={handleJointSign}
+                  disabled={!agreed || !primarySigned}
+                  startIcon={<Email />}
+                  fullWidth
+                  sx={{ bgcolor: '#1976d2' }}
+                >
+                  Send DocuSign to Joint Applicant
+                </Button>
+              )}
+
+              {jointSigning && (
+                <Box>
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    <strong>DocuSign Sent!</strong> Please check your email ({customerData.jointApplicant.email}) and follow the DocuSign instructions to complete the signature.
+                  </Alert>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <LinearProgress sx={{ flexGrow: 1 }} />
+                    <Typography variant="body2" color="text.secondary">
+                      Waiting for signature...
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+
+              {jointSigned && (
+                <Alert severity="success">
+                  <CheckCircle sx={{ mr: 1 }} />
+                  <strong>Signed Successfully!</strong> Joint applicant has completed DocuSign verification.
+                </Alert>
+              )}
+
+              {!primarySigned && (
+                <Alert severity="warning" sx={{ mt: 2 }}>
+                  Primary applicant must sign first before joint applicant can proceed.
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
         </Box>
+      )}
+
+      {/* Overall Progress */}
+      {(primarySigning || jointSigning || primarySigned || jointSigned) && (
+        <Card variant="outlined" sx={{ bgcolor: '#e3f2fd', mb: 3 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom color="primary">
+              Signing Progress
+            </Typography>
+            <LinearProgress
+              variant="determinate"
+              value={isJointApplication 
+                ? ((primarySigned ? 1 : 0) + (jointSigned ? 1 : 0)) * 50
+                : primarySigned ? 100 : 0
+              }
+              sx={{ mb: 2, height: 8, borderRadius: 4 }}
+            />
+            <Typography variant="body1" textAlign="center" fontWeight="bold">
+              {isJointApplication 
+                ? `${(primarySigned ? 1 : 0) + (jointSigned ? 1 : 0)} of 2 signatures completed`
+                : primarySigned ? 'Signature completed' : 'Waiting for signature'
+              }
+            </Typography>
+            
+            {allDocumentsSigned && (
+              <Alert severity="success" sx={{ mt: 2 }}>
+                <strong>All Signatures Complete!</strong> Processing your application...
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
       )}
     </Paper>
   );
