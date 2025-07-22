@@ -90,6 +90,8 @@ interface CustomerData {
   dateOfBirth: string;
   address: string;
   isExistingCustomer: boolean;
+  isJoint?: boolean;
+  jointApplicant?: CustomerData;
 }
 
 interface ApplicationData {
@@ -641,7 +643,17 @@ function CustomerDetailsForm({
   product: Product;
   onSubmit: (data: CustomerData) => void;
 }) {
-  const [formData, setFormData] = useState<CustomerData>({
+  const [applicationType, setApplicationType] = useState<'single' | 'joint' | ''>('');
+  const [primaryApplicant, setPrimaryApplicant] = useState<CustomerData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    dateOfBirth: '',
+    address: '',
+    isExistingCustomer: false,
+  });
+  const [jointApplicant, setJointApplicant] = useState<CustomerData>({
     firstName: '',
     lastName: '',
     email: '',
@@ -651,75 +663,127 @@ function CustomerDetailsForm({
     isExistingCustomer: false,
   });
 
-  const [uploadMethod, setUploadMethod] = useState<'manual' | 'bankStatement'>(
-    'manual'
-  );
-  const [isExtracting, setIsExtracting] = useState(false);
+  const [primaryUploadMethod, setPrimaryUploadMethod] = useState<'manual' | 'bankStatement'>('manual');
+  const [jointUploadMethod, setJointUploadMethod] = useState<'manual' | 'bankStatement'>('manual');
+  const [isExtractingPrimary, setIsExtractingPrimary] = useState(false);
+  const [isExtractingJoint, setIsExtractingJoint] = useState(false);
 
   const handleBankStatementUpload = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
+    applicantType: 'primary' | 'joint'
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      setIsExtracting(true);
+      if (applicantType === 'primary') {
+        setIsExtractingPrimary(true);
+      } else {
+        setIsExtractingJoint(true);
+      }
+      
       // Simulate bank statement processing
       setTimeout(() => {
-        // Simulate extracted data from bank statement
-        setFormData({
-          firstName: 'Rajat',
-          lastName: 'Maheshwari',
-          email: 'rajat.m@email.com',
-          phone: '+353 89 123 4567',
-          dateOfBirth: '1984-03-01',
-          address: '123 Grafton Street, Dublin 2, Ireland',
+        const extractedData = {
+          firstName: applicantType === 'primary' ? 'Rajat' : 'Sarah',
+          lastName: applicantType === 'primary' ? 'Maheshwari' : 'Johnson',
+          email: applicantType === 'primary' ? 'rajat.m@email.com' : 'sarah.j@email.com',
+          phone: applicantType === 'primary' ? '+353 89 123 4567' : '+353 89 765 4321',
+          dateOfBirth: applicantType === 'primary' ? '1984-03-01' : '1987-07-15',
+          address: applicantType === 'primary' ? '123 Grafton Street, Dublin 2, Ireland' : '456 O\'Connell Street, Dublin 1, Ireland',
           isExistingCustomer: false,
-        });
-        setIsExtracting(false);
+        };
+
+        if (applicantType === 'primary') {
+          setPrimaryApplicant(extractedData);
+          setIsExtractingPrimary(false);
+        } else {
+          setJointApplicant(extractedData);
+          setIsExtractingJoint(false);
+        }
       }, 2000);
+    }
+  };
+
+  const handleInputChange = (
+    field: keyof CustomerData,
+    value: string | boolean,
+    applicantType: 'primary' | 'joint'
+  ) => {
+    if (applicantType === 'primary') {
+      setPrimaryApplicant(prev => ({ ...prev, [field]: value }));
+    } else {
+      setJointApplicant(prev => ({ ...prev, [field]: value }));
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    const submissionData: CustomerData = {
+      ...primaryApplicant,
+      isJoint: applicationType === 'joint',
+      jointApplicant: applicationType === 'joint' ? jointApplicant : undefined,
+    };
+    
+    onSubmit(submissionData);
   };
 
-  return (
-    <Paper sx={{ p: 4 }}>
-      <Box display="flex" alignItems="center" gap={2} mb={3}>
-        <Person color="primary" />
-        <Typography variant="h5">Customer Details</Typography>
-      </Box>
-      <Alert severity="info" sx={{ mb: 3 }}>
-        You've selected: <strong>{product.name}</strong>. Please provide your
-        details to continue.
-      </Alert>
+  const isFormValid = () => {
+    const isPrimaryValid = primaryApplicant.firstName && 
+                           primaryApplicant.lastName && 
+                           primaryApplicant.email && 
+                           primaryApplicant.phone &&
+                           primaryApplicant.dateOfBirth &&
+                           primaryApplicant.address;
+
+    if (applicationType === 'single') {
+      return isPrimaryValid;
+    } else if (applicationType === 'joint') {
+      const isJointValid = jointApplicant.firstName && 
+                           jointApplicant.lastName && 
+                           jointApplicant.email && 
+                           jointApplicant.phone &&
+                           jointApplicant.dateOfBirth &&
+                           jointApplicant.address;
+      return isPrimaryValid && isJointValid;
+    }
+    
+    return false;
+  };
+
+  const renderApplicantForm = (
+    applicant: CustomerData,
+    applicantType: 'primary' | 'joint',
+    uploadMethod: 'manual' | 'bankStatement',
+    setUploadMethod: (method: 'manual' | 'bankStatement') => void,
+    isExtracting: boolean
+  ) => (
+    <Box sx={{ mb: 4 }}>
+      <Typography variant="h6" gutterBottom sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+        {applicantType === 'primary' ? 'Primary Applicant' : 'Joint Applicant'} Details
+      </Typography>
 
       {/* Data Input Method Selection */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h6" gutterBottom>
-          How would you like to provide your information?
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          How would you like to provide information for the {applicantType} applicant?
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <Card
               sx={{
                 cursor: 'pointer',
-                border:
-                  uploadMethod === 'manual'
-                    ? '2px solid #1976d2'
-                    : '1px solid #e0e0e0',
+                border: uploadMethod === 'manual' ? '2px solid #1976d2' : '1px solid #e0e0e0',
                 '&:hover': { borderColor: '#1976d2' },
               }}
               onClick={() => setUploadMethod('manual')}
             >
-              <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                <Person sx={{ fontSize: 40, color: '#1976d2', mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
+              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+                <Person sx={{ fontSize: 30, color: '#1976d2', mb: 1 }} />
+                <Typography variant="body1" gutterBottom>
                   Manual Entry
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Fill in your details manually using the form below
+                  Fill in details manually
                 </Typography>
               </CardContent>
             </Card>
@@ -728,22 +792,18 @@ function CustomerDetailsForm({
             <Card
               sx={{
                 cursor: 'pointer',
-                border:
-                  uploadMethod === 'bankStatement'
-                    ? '2px solid #1976d2'
-                    : '1px solid #e0e0e0',
+                border: uploadMethod === 'bankStatement' ? '2px solid #1976d2' : '1px solid #e0e0e0',
                 '&:hover': { borderColor: '#1976d2' },
               }}
               onClick={() => setUploadMethod('bankStatement')}
             >
-              <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                <AutoAwesome sx={{ fontSize: 40, color: '#1976d2', mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
+              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+                <AutoAwesome sx={{ fontSize: 30, color: '#1976d2', mb: 1 }} />
+                <Typography variant="body1" gutterBottom>
                   Bank Statement Upload
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Upload your bank statement and we'll extract your details
-                  automatically
+                  Auto-extract from bank statement
                 </Typography>
               </CardContent>
             </Card>
@@ -753,20 +813,19 @@ function CustomerDetailsForm({
 
       {/* Bank Statement Upload Section */}
       {uploadMethod === 'bankStatement' && (
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 3 }}>
           <Alert severity="success" sx={{ mb: 2 }}>
-            <strong>Smart Data Extraction:</strong> Upload your bank statement
-            (PDF) and our we will extract your personal information.
+            <strong>Smart Data Extraction:</strong> Upload bank statement and we'll extract the information automatically.
           </Alert>
 
           <input
             accept=".pdf,.jpg,.jpeg,.png"
             style={{ display: 'none' }}
-            id="bank-statement-upload"
+            id={`bank-statement-upload-${applicantType}`}
             type="file"
-            onChange={handleBankStatementUpload}
+            onChange={(e) => handleBankStatementUpload(e, applicantType)}
           />
-          <label htmlFor="bank-statement-upload">
+          <label htmlFor={`bank-statement-upload-${applicantType}`}>
             <Button
               variant="outlined"
               component="span"
@@ -783,14 +842,14 @@ function CustomerDetailsForm({
             >
               {isExtracting
                 ? 'Extracting Information...'
-                : 'Upload Bank Statement (PDF, JPG, PNG)'}
+                : `Upload ${applicantType === 'primary' ? 'Primary' : 'Joint'} Applicant Bank Statement`}
             </Button>
           </label>
 
           {isExtracting && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                Processing your bank statement...
+                Processing bank statement...
               </Typography>
               <LinearProgress />
             </Box>
@@ -798,194 +857,150 @@ function CustomerDetailsForm({
         </Box>
       )}
 
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="First Name"
-              value={formData.firstName}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, firstName: e.target.value }))
-              }
-              required
-              InputProps={{
-                readOnly:
-                  uploadMethod === 'bankStatement' && !!formData.firstName,
-              }}
-              sx={{
-                '& .MuiInputBase-input': {
-                  backgroundColor:
-                    uploadMethod === 'bankStatement' && !!formData.firstName
-                      ? '#f5f5f5'
-                      : 'transparent',
-                },
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Last Name"
-              value={formData.lastName}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, lastName: e.target.value }))
-              }
-              required
-              InputProps={{
-                readOnly:
-                  uploadMethod === 'bankStatement' && !!formData.lastName,
-              }}
-              sx={{
-                '& .MuiInputBase-input': {
-                  backgroundColor:
-                    uploadMethod === 'bankStatement' && !!formData.lastName
-                      ? '#f5f5f5'
-                      : 'transparent',
-                },
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, email: e.target.value }))
-              }
-              required
-              InputProps={{
-                readOnly: uploadMethod === 'bankStatement' && !!formData.email,
-              }}
-              sx={{
-                '& .MuiInputBase-input': {
-                  backgroundColor:
-                    uploadMethod === 'bankStatement' && !!formData.email
-                      ? '#f5f5f5'
-                      : 'transparent',
-                },
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Phone"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, phone: e.target.value }))
-              }
-              required
-              InputProps={{
-                readOnly: uploadMethod === 'bankStatement' && !!formData.phone,
-              }}
-              sx={{
-                '& .MuiInputBase-input': {
-                  backgroundColor:
-                    uploadMethod === 'bankStatement' && !!formData.phone
-                      ? '#f5f5f5'
-                      : 'transparent',
-                },
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Date of Birth"
-              type="date"
-              value={formData.dateOfBirth}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  dateOfBirth: e.target.value,
-                }))
-              }
-              InputLabelProps={{ shrink: true }}
-              required
-              InputProps={{
-                readOnly:
-                  uploadMethod === 'bankStatement' && !!formData.dateOfBirth,
-              }}
-              sx={{
-                '& .MuiInputBase-input': {
-                  backgroundColor:
-                    uploadMethod === 'bankStatement' && !!formData.dateOfBirth
-                      ? '#f5f5f5'
-                      : 'transparent',
-                },
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Customer Type</InputLabel>
-              <Select
-                value={formData.isExistingCustomer ? 'existing' : 'new'}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    isExistingCustomer: e.target.value === 'existing',
-                  }))
-                }
-              >
-                <MenuItem value="new">New Customer</MenuItem>
-                <MenuItem value="existing">Existing Customer</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Address"
-              multiline
-              rows={3}
-              value={formData.address}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, address: e.target.value }))
-              }
-              required
-              InputProps={{
-                readOnly:
-                  uploadMethod === 'bankStatement' && !!formData.address,
-              }}
-              sx={{
-                '& .MuiInputBase-input': {
-                  backgroundColor:
-                    uploadMethod === 'bankStatement' && !!formData.address
-                      ? '#f5f5f5'
-                      : 'transparent',
-                },
-              }}
-            />
-          </Grid>
+      {/* Manual Form Fields */}
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="First Name"
+            value={applicant.firstName}
+            onChange={(e) => handleInputChange('firstName', e.target.value, applicantType)}
+            required
+            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.firstName}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Last Name"
+            value={applicant.lastName}
+            onChange={(e) => handleInputChange('lastName', e.target.value, applicantType)}
+            required
+            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.lastName}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Email"
+            type="email"
+            value={applicant.email}
+            onChange={(e) => handleInputChange('email', e.target.value, applicantType)}
+            required
+            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.email}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Phone"
+            value={applicant.phone}
+            onChange={(e) => handleInputChange('phone', e.target.value, applicantType)}
+            required
+            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.phone}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Date of Birth"
+            type="date"
+            value={applicant.dateOfBirth}
+            onChange={(e) => handleInputChange('dateOfBirth', e.target.value, applicantType)}
+            InputLabelProps={{ shrink: true }}
+            required
+            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.dateOfBirth}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Address"
+            multiline
+            rows={2}
+            value={applicant.address}
+            onChange={(e) => handleInputChange('address', e.target.value, applicantType)}
+            required
+            disabled={uploadMethod === 'bankStatement' && !isExtracting && !applicant.address}
+          />
+        </Grid>
+      </Grid>
+    </Box>
+  );
 
-          {/* Show success message when data is extracted */}
-          {uploadMethod === 'bankStatement' && formData.firstName && (
-            <Grid item xs={12}>
-              <Alert severity="success" sx={{ mb: 2 }}>
-                <strong>Information Extracted Successfully!</strong> Your
-                details have been automatically filled from the bank statement.
-                Please review and modify if needed.
-              </Alert>
-            </Grid>
+  return (
+    <Paper sx={{ p: 4 }}>
+      <Box display="flex" alignItems="center" gap={2} mb={3}>
+        <Person color="primary" />
+        <Typography variant="h5">Customer Details</Typography>
+      </Box>
+      <Alert severity="info" sx={{ mb: 3 }}>
+        You've selected: <strong>{product.name}</strong>. Please provide your details to continue.
+      </Alert>
+
+      {/* Application Type Selection */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Application Type
+        </Typography>
+        <FormControl fullWidth sx={{ mb: 3 }}>
+          <InputLabel>Select Application Type</InputLabel>
+          <Select
+            value={applicationType}
+            onChange={(e) => setApplicationType(e.target.value as 'single' | 'joint')}
+            label="Select Application Type"
+          >
+            <MenuItem value="single">Single Application</MenuItem>
+            <MenuItem value="joint">Joint Application</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* Applicant Forms */}
+      {applicationType && (
+        <form onSubmit={handleSubmit}>
+          {/* Primary Applicant */}
+          {renderApplicantForm(
+            primaryApplicant,
+            'primary',
+            primaryUploadMethod,
+            setPrimaryUploadMethod,
+            isExtractingPrimary
           )}
 
-          <Grid item xs={12}>
+          {/* Joint Applicant */}
+          {applicationType === 'joint' && (
+            <>
+              <Divider sx={{ my: 4 }} />
+              {renderApplicantForm(
+                jointApplicant,
+                'joint',
+                jointUploadMethod,
+                setJointUploadMethod,
+                isExtractingJoint
+              )}
+            </>
+          )}
+
+          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
             <Button
               type="submit"
               variant="contained"
               size="large"
-              fullWidth
+              disabled={!isFormValid()}
               endIcon={<ArrowForward />}
+              sx={{
+                bgcolor: '#1976d2',
+                '&:hover': { bgcolor: '#1565c0' },
+                px: 4,
+                py: 1.5,
+              }}
             >
               Continue to Application Details
             </Button>
-          </Grid>
-        </Grid>
-      </form>
+          </Box>
+        </form>
+      )}
     </Paper>
   );
 }
