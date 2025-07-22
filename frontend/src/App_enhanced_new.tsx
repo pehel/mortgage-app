@@ -905,7 +905,7 @@ const ProductSelectionStep: React.FC<{
                       color="text.secondary"
                       display="block"
                     >
-                      Interest Rate
+                      APR
                     </Typography>
                     <Typography
                       variant="h6"

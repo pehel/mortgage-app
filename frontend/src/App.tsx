@@ -181,11 +181,7 @@ function App() {
       description: 'Eco-friendly financing for sustainable projects',
       icon: <Park />,
       color: '#2e7d32',
-      features: [
-        'Lower interest rates',
-        'Environmental impact',
-        'Government incentives',
-      ],
+      features: ['Lower APR', 'Environmental impact', 'Government incentives'],
       limits: '€2,000 - €50,000',
       interestRate: '2.5% - 5.9%',
     },
@@ -1350,7 +1346,7 @@ function ApplicationDetailsForm({
                               {calculation.interestRate}%
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              Interest Rate
+                              APR
                             </Typography>
                           </Box>
                         </Grid>
@@ -1359,7 +1355,7 @@ function ApplicationDetailsForm({
                       <Alert severity="info" sx={{ mt: 2 }}>
                         <strong>Loan Summary:</strong> €
                         {formData.amount?.toLocaleString()} over {formData.term}{' '}
-                        months at {calculation.interestRate}% interest rate
+                        months at {calculation.interestRate}% APR
                       </Alert>
                     </CardContent>
                   </Card>
@@ -1981,7 +1977,7 @@ function AgreementStep({
               <ListItemText primary={`Product: ${product.name}`} />
             </ListItem>
             <ListItem>
-              <ListItemText primary="Interest Rate: As per approved rate" />
+              <ListItemText primary="APR: As per approved rate" />
             </ListItem>
             <ListItem>
               <ListItemText primary="Repayment: Monthly installments" />
